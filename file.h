@@ -9,14 +9,13 @@ struct file {
 };
 
 
-// in-memory copy of an inode
+// in-core file system types
+
 struct inode {
   uint dev;           // Device number
   uint inum;          // Inode number
   int ref;            // Reference count
-  struct sleeplock lock; // protects everything below here
-  int valid;          // inode has been read from disk?
-
+  int flags;          // I_BUSY, I_VALID 
   short type;         // copy of disk inode
   short major;
   short minor;
@@ -25,8 +24,12 @@ struct inode {
   uint addrs[NDIRECT+1];
 };
 
-// table mapping major device number to
-// device functions
+#define I_BUSY 0x1
+#define I_VALID 0x2
+
+
+// device implementations
+
 struct devsw {
   int (*read)(struct inode*, char*, int);
   int (*write)(struct inode*, char*, int);
